@@ -21,6 +21,8 @@
 -- resolution, instead of however large our window is; used to provide
 -- a more retro aesthetic
 --
+-- terminal pasta: "C:\Users\David\Downloads\love-0.10.2-win64\love-0.10.2-win64\love.exe" "C:\Users\David\Desktop\Everything\Coding\gd50\gd50\pong"
+
 -- https://github.com/Ulydev/push
 push = require 'push'
 
@@ -276,16 +278,16 @@ function love.update(dt)
     end
 
     -- player 2
-    if love.keyboard.isDown('up') then
+    if ball.dx < 0 then
         player2.dy = -PADDLE_SPEED
-    elseif love.keyboard.isDown('down') then
+    elseif ball.dy > 0 then
         player2.dy = PADDLE_SPEED
     else
         player2.dy = 0
     end
 
     player1:update(dt)
-    player2:update(dt)
+    player2:update(dt) 
 
     -- update ball's position
     ball:update(dt)
