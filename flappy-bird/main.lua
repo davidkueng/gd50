@@ -34,7 +34,7 @@
       time this sound effect plays, the music should pause, and once the user presses P again, the gameplay and the music should resume just as they were! 
       To cap it off, display a pause icon in the middle of the screen, nice and large, so as to make it clear the game is paused.
     - love.mousepressed(x,y,button) Callback fired every time a mouse button is pressed.
-      make the function global like keypressed to track in Bird.lua file instead of main.lua.
+      make the function global like keypressed to track in Bird.lua file instead of main.lua
 
 
 ]]
