@@ -15,6 +15,13 @@
 
     ASSIGNEMENT: 
 
+    Be sure to watch Lecture 1 and read through the code so you have a firm understanding of how it works before diving in! In particular,
+    take note of where the logic is for spawning pipes and the parameters that drive both the gap between pipes and the interval at which pipes spawn, 
+    as those will be two primary components of this update! You’ll be making some notable changes to the ScoreState, so be sure to read through that as well 
+    and get a sense for how images are stored, since you’ll be incorporating your own! Lastly, think about what you need in order to incorporate a pause feature 
+    (a simple version of which we saw in lecture!). And if we want to pause the music, we’ll probably need a method to do this that belongs to the audio object 
+    LÖVE gives us when we call love.audio.newSource; try browsing the documentation on the LÖVE2D wiki to find out what it is!
+
     - Randomize the gap between pipes (vertical space), such that they’re no longer hardcoded to 90 pixels.
     - Randomize the interval at which pairs of pipes spawn, such that they’re no longer always 2 seconds apart.
     - When a player enters the ScoreState, award them a “medal” via an image displayed along with the score; this 
