@@ -29,21 +29,20 @@ end
 
 function PlayState:update(dt)
     -- spawn a new pipe pair every second and a half
-    if self.timer > 2 then
-        -- modify the last Y coordinate we placed so pipe gaps aren't too far apart
-        local y = math.max(-PIPE_HEIGHT + 10, math.min(self.lastY + math.random(-20, 20), PIPE_HEIGHT / 3))
+        if self.timer > math.random(2, 10) then
+            -- modify the last Y coordinate we placed so pipe gaps aren't too far apart
+            local y = math.max(-PIPE_HEIGHT + 10, math.min(self.lastY + math.random(-20, 20), PIPE_HEIGHT / 3))
 
-        table.insert(self.pipePairs, {
-            -- flag to store whether we've scored the point for this pair of pipes
-            scored = false,
-            pipes = {
-                Pipe('top', y),
-                Pipe('bottom', y + PIPE_HEIGHT + 90)
-            }
-        })
-
-        -- reset timer
-        self.timer = 0
+            table.insert(self.pipePairs, {
+                -- flag to store whether we've scored the point for this pair of pipes
+                scored = false,
+                pipes = {
+                    Pipe('top', y),
+                    Pipe('bottom', y + PIPE_HEIGHT + math.random(80, 150))
+                }
+            })
+            -- reset timer
+            self.timer = 0         
     end
 
     for k, pair in pairs(self.pipePairs) do
@@ -102,7 +101,9 @@ function PlayState:update(dt)
         })
     end
 
-    self.bird:update(dt)
+    if scrolling and paused == false then
+        self.bird:update(dt)
+    end
 end
 
 function PlayState:render()
@@ -125,7 +126,6 @@ function PlayState:enter()
     -- if we're coming from death, restart scrolling
     scrolling = true
 end
-
 --[[
     Called when this state changes to another state.
 ]]

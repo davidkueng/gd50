@@ -11,31 +11,9 @@
     A variant of popular games like "Helicopter Game" that floated around the Internet
     for years prior. Illustrates some of the most basic procedural generation of game
     levels possible as by having pipes stick out of the ground by varying amounts, acting
-    as an infinitely generated obstacle course for the player.
+    as an infinitely generated obstacle course for the player.   
 
-    ASSIGNEMENT: 
-
-    Be sure to watch Lecture 1 and read through the code so you have a firm understanding of how it works before diving in! In particular,
-    take note of where the logic is for spawning pipes and the parameters that drive both the gap between pipes and the interval at which pipes spawn, 
-    as those will be two primary components of this update! You’ll be making some notable changes to the ScoreState, so be sure to read through that as well 
-    and get a sense for how images are stored, since you’ll be incorporating your own! Lastly, think about what you need in order to incorporate a pause feature 
-    (a simple version of which we saw in lecture!). And if we want to pause the music, we’ll probably need a method to do this that belongs to the audio object 
-    LÖVE gives us when we call love.audio.newSource; try browsing the documentation on the LÖVE2D wiki to find out what it is!
-
-    - Randomize the gap between pipes (vertical space), such that they’re no longer hardcoded to 90 pixels.
-    - Randomize the interval at which pairs of pipes spawn, such that they’re no longer always 2 seconds apart.
-    - When a player enters the ScoreState, award them a “medal” via an image displayed along with the score; this 
-      can be any image or any type of medal you choose (e.g., ribbons, actual medals, trophies, etc.), so long as 
-      each is different and based on the points they scored that life. Choose 3 different ones, as well as the minimum 
-      score needed for each one (though make it fair and not too hard to test :)).
-    - Implement a pause feature, such that the user can simply press “P” (or some other key) and pause the state of the game. 
-      This pause effect will be slightly fancier than the pause feature we showed in class, though not ultimately that much different. 
-      When they pause the game, a simple sound effect should play (I recommend testing out bfxr for this, as seen in Lecture 0!). At the same 
-      time this sound effect plays, the music should pause, and once the user presses P again, the gameplay and the music should resume just as they were! 
-      To cap it off, display a pause icon in the middle of the screen, nice and large, so as to make it clear the game is paused.
-    - love.mousepressed(x,y,button) Callback fired every time a mouse button is pressed.
-      make the function global like keypressed to track in Bird.lua file instead of main.lua
-
+    execute in console: "C:\Users\David\Downloads\love-0.10.2-win64\love-0.10.2-win64\love.exe" "C:\Users\David\Desktop\Everything\Coding\gd50\gd50\flappy-bird"
 
 ]]
 
@@ -60,6 +38,7 @@ require 'StateMachine'
 require 'states/BaseState'
 require 'states/CountdownState'
 require 'states/PlayState'
+require 'states/PauseState'
 require 'states/ScoreState'
 require 'states/TitleScreenState'
 
@@ -92,6 +71,8 @@ function love.load()
     -- initialize our nearest-neighbor filter
     love.graphics.setDefaultFilter('nearest', 'nearest')
     
+    -- paused = false
+
     -- seed the RNG
     math.randomseed(os.time())
 
@@ -125,6 +106,7 @@ function love.load()
         ['title'] = function() return TitleScreenState() end,
         ['countdown'] = function() return CountdownState() end,
         ['play'] = function() return PlayState() end,
+        ['pause'] = function() return PauseState() end,
         ['score'] = function() return ScoreState() end
     }
     gStateMachine:change('title')
@@ -154,23 +136,38 @@ function love.keyboard.wasPressed(key)
     end
 end
 
+paused = false
+
 function love.update(dt)
-    if scrolling then
+
+    if love.keyboard.wasPressed('p') then
+        paused = not paused
+    end
+
+    if scrolling and paused == false then
         backgroundScroll = (backgroundScroll + BACKGROUND_SCROLL_SPEED * dt) % BACKGROUND_LOOPING_POINT
         groundScroll = (groundScroll + GROUND_SCROLL_SPEED * dt) % VIRTUAL_WIDTH
     end
 
-    gStateMachine:update(dt)
+        gStateMachine:update(dt)
+        love.keyboard.keysPressed = {}    
 
-    love.keyboard.keysPressed = {}
 end
 
-function love.draw()
-    push:start()
-    
+function love.draw()  
+  
+    push:start()     
+
     love.graphics.draw(background, -backgroundScroll, 0)
-    gStateMachine:render()
+
+    if paused == false then
+        gStateMachine:render()
+    else 
+        love.graphics.setFont(hugeFont)
+        love.graphics.printf('PAUSE', 0, 64, VIRTUAL_WIDTH, 'center')
+    end
     love.graphics.draw(ground, -groundScroll, VIRTUAL_HEIGHT - 16)
     
     push:finish()
+
 end
