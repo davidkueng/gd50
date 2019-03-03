@@ -1,0 +1,4 @@
+- playstate does not reset after gameover (maybe this is by design)
+- collision and orientation on y does not work correctly on larger paddles serveState.lua line 21
+- additional balls are still in play after the go under y
+- paddle does not keep color if paddleSize changes

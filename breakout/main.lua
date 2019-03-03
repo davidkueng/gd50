@@ -50,6 +50,8 @@ require 'Ball'
 -- score points
 require 'Brick'
 
+require 'Powerup'
+
 -- a basic StateMachine class which will allow us to transition to and from
 -- game states smoothly and avoid monolithic code in one file
 require 'StateMachine'
@@ -119,7 +121,8 @@ function love.load()
         ['bricks'] = GenerateQuadsBricks(gTextures['main']),
         ['paddles'] = GenerateQuadsPaddles(gTextures['main']),
         ['balls'] = GenerateQuadsBalls(gTextures['main']),
-        ['hearts'] = GenerateQuads(gTextures['hearts'], 10, 9)
+        ['hearts'] = GenerateQuads(gTextures['hearts'], 10, 9),
+        ['power'] = GenerateQuadsPowerup(gTextures['main'])
     }
     
     -- initialize our virtual resolution, which will be rendered within our
@@ -152,10 +155,25 @@ function love.load()
 
     -- initialize our player paddles; make them global so that they can be
     -- detected by other functions and modules
-    player = Paddle()
+
+    paddleSize = {        
+        Paddle(1, 32, 1),
+        Paddle(2, 64, 1),
+        Paddle(3, 72, 1),
+        Paddle(4, 80, 1)
+    }
+
+    player = paddleSize[2] 
+    currentIndex = 2
     
     -- place a ball in the middle of the screen
     ball = Ball(1)
+
+    ballTwo = Ball(1)
+
+    ballThree = Ball(1)
+
+    powerup = Powerup()
 
     -- initialize score variable
     score = 0
@@ -199,8 +217,8 @@ function love.load()
     gStateMachine:change('start')
 
     -- play our music outside of all states and set it to looping
-    gSounds['music']:play()
-    gSounds['music']:setLooping(true)
+    -- gSounds['music']:play()
+    -- gSounds['music']:setLooping(true)
 
     -- a table we'll use to keep track of which keys have been pressed this
     -- frame, to get around the fact that LÖVE's default callback won't let us

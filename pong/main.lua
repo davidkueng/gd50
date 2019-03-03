@@ -28,8 +28,8 @@ push = require 'push'
 
 -- the "Class" library we're using will allow us to represent anything in
 -- our game as code, rather than keeping track of many disparate variables and
--- methods
---
+-- method
+--sdkjlfhsdfsafsadfa
 -- https://github.com/vrld/hump/blob/master/class.lua
 Class = require 'class'
 
@@ -61,7 +61,6 @@ function love.load()
     -- means there will be no filtering of pixels (blurriness), which is
     -- important for a nice crisp, 2D look
     love.graphics.setDefaultFilter('nearest', 'nearest')
-
     -- seed the RNG so that calls to random are always random
     math.randomseed(os.time())
 

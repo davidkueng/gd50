@@ -16,7 +16,8 @@
 
 ServeState = Class{__includes = BaseState}
 
-function ServeState:init()
+function ServeState:init()    
+    
     player.x = VIRTUAL_WIDTH / 2 - 32
     player.y = VIRTUAL_HEIGHT - 24
 end

@@ -21,6 +21,18 @@ function PlayState:init()
     -- give a random y velocity, but add an amount (capped) based on the level
     ball.dy = math.random(-50, -60) - math.min(100, level * 5)
 
+    ballTwo.dx = math.random(-200, 200)
+    -- -- give a random y velocity, but add an amount (capped) based on the level
+    ballTwo.dy = math.random(-50, -60) - math.min(100, level * 5)
+
+    ballThree.dx = math.random(-200, 200)
+    -- -- give a random y velocity, but add an amount (capped) based on the level
+    ballThree.dy = math.random(-50, -60) - math.min(100, level * 5)
+
+    powerup.dy = math.random(20, 40)
+    powerup.counter = 0
+    powerupInplay = 0
+
     -- keep track of whether the game is paused
     self.paused = false
 end
@@ -44,110 +56,73 @@ function PlayState:update(dt)
         gSounds['pause']:play()
         return
     end
-
     -- player input
     playerMove(dt)
-
     -- update positions based on velocity
     player:update(dt)
-    ball:update(dt)
+    ball:update(dt)   
+
+    if powerup:collides(player) then   
+        powerupInplay = powerupInplay + 2
+    end
+
+    if powerupInplay >= 1 then
+        ballTwo:update(dt)
+        ballThree:update(dt)
+    end
+
+    if powerup.counter >= 1 then
+        powerup:update(dt)
+    end 
 
     -- bounce the ball back up if we collide with the paddle
     if ball:collides(player) then
-        -- raise ball above paddle in case it goes below it, then reverse dy
-        ball.y = player.y - 8
-        ball.dy = -ball.dy
-
-        --
-        -- tweak angle of bounce based on where it hits the paddle
-        --
-
-        -- if we hit the paddle on its left side...
-        if ball.x < player.x + (player.width / 2) and player.dx < 0 then
-            -- if the player is moving left...
-            if player.dx < 0 then
-                ball.dx = -math.random(30, 50 + 
-                    10 * player.width / 2 - (ball.x + 8 - player.x))
-            end
-        else
-            -- if the player is moving right...
-            if player.dx > 0 then
-                ball.dx = math.random(30, 50 + 
-                    10 * (ball.x - player.x - player.width / 2))
-            end
-        end
-        gSounds['paddle-hit']:play()
+        ball:playerCollision(player)
     end
 
-    -- eliminate brick if we collide with it
+    if ballTwo:collides(player) then
+        ballTwo:playerCollision(player)
+    end
+
+    if ballThree:collides(player) then
+        ballThree:playerCollision(player)
+    end
+
+    -- eliminate brick if we collide with it // not sure if it works when only checking for victory once
     for k, brick in pairs(bricks) do
-        if brick.inPlay and ball:collides(brick) then
-            score = score + (brick.tier * 200 + brick.color * 25)
-            brick:hit()
+        if brick.inPlay and ball:collides(brick) then      
+                
+            ball:brickCollision(brick, dt)           
+        end
 
-            -- if we have enough points, recover a point of health
-            if score > recoverPoints then
-                -- can't go above 3 health
-                health = math.min(3, health + 1)
+        if brick.inPlay and ballTwo:collides(brick) then       
+            ballTwo:brickCollision(brick, dt)           
+        end
 
-                -- multiply recover points by 2, but no more than 100000
-                recoverPoints = math.min(100000, recoverPoints * 2)
-
-                -- play recover sound effect
-                gSounds['recover']:play()
-            end
-
-            if self:checkVictory() then
-                gStateMachine:change('victory')
-            end
-
-            -- first, reapply inverted velocity to reset our position
-            ball.x = ball.x + -ball.dx * dt
-            ball.y = ball.y + -ball.dy * dt
-
-            -- hit from the left
-            if ball.dx > 0 then
-                -- left edge
-                if ball.x + 2 < brick.x then
-                    ball.dx = -ball.dx
-                -- top edge
-                elseif ball.y + 1 < brick.y then
-                    ball.dy = -ball.dy
-                -- bottom edge
-                else
-                    -- bottom edge
-                    ball.dy = -ball.dy
-                end
-            else
-                -- right edge
-                if ball.x + 6 > brick.x + brick.width then
-                    -- reset ball position
-                    ball.dx = -ball.dx
-                elseif ball.y + 1 < brick.y then
-                    -- top edge
-                    ball.dy = -ball.dy
-                else
-                    -- bottom edge
-                    ball.dy = -ball.dy
-                end
-            end
-
-            -- slightly scale the y velocity to speed up the game
-            ball.dy = ball.dy * 1.02
-
-            -- only collide with one brick per turn
-            break
+        if brick.inPlay and ballThree:collides(brick) then       
+            ballThree:brickCollision(brick, dt)          
+        end    
+            
+        if self:checkVictory() then
+            resetPowerup()
+            gStateMachine:change('victory')
         end
     end
 
     -- if ball goes below bounds, revert to serve state and decrease health
     if ball.y >= VIRTUAL_HEIGHT then
         health = health - 1
+        if currentIndex > 1 then 
+            player = paddleSize[currentIndex - 1]
+            currentIndex = currentIndex - 1
+        end
         gSounds['hurt']:play()
 
         if health == 0 then
+            resetPowerup()
             gStateMachine:change('game-over')
         else
+            resetPowerup()
             gStateMachine:change('serve', player.skin)
         end
     end
@@ -168,6 +143,20 @@ function PlayState:render()
     renderBricks()
     renderScore()
     renderHealth()
+
+    if powerup.counter >= 1 then
+        powerup:render()
+    end
+
+    if powerupInplay > 1 then
+        ballTwo:render()  
+        ballThree:render()  
+    end
+
+    function resetPowerup()
+        powerupInplay = 0
+        powerup.counter = 0
+    end
 
     for k, brick in pairs(bricks) do
         brick:renderParticles()

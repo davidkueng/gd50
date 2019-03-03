@@ -28,6 +28,10 @@ function Ball:init(skin)
     -- this will effectively be the color of our ball, and we will index
     -- our table of Quads relating to the global block texture using this
     self.skin = skin
+
+    self.x = VIRTUAL_WIDTH / 2 - 2
+    self.y = VIRTUAL_HEIGHT / 2 - 2
+
 end
 
 --[[
@@ -46,10 +50,101 @@ function Ball:collides(target)
     if self.y > target.y + target.height or target.y > self.y + self.height then
         return false
     end 
-
-    -- if the above aren't true, they're overlapping
+    
     return true
+    -- if the above aren't true, they're overlapping
+ 
 end
+
+function Ball:playerCollision(target)
+    self.y = target.y - 8
+    self.dy = -self.dy        
+    
+    if self.x < target.x + (target.width / 2) and target.dx < 0 then
+        -- if the target is moving left...
+        if target.dx < 0 then
+            self.dx = -math.random(30, 50 + 
+                10 * target.width / 2 - (self.x + 8 - target.x))
+        end
+    else
+        -- if the target is moving right...
+        if target.dx > 0 then
+            self.dx = math.random(30, 50 + 
+                10 * (self.x - target.x - target.width / 2))
+        end
+    end
+    gSounds['paddle-hit']:play()
+end
+
+function Ball:brickCollision(target, dt)
+
+    score = score + (target.tier * 200 + target.color * 25)
+    target:hit()
+    powerup.counter = powerup.counter + 1
+
+    -- if we have enough points, recover a point of health
+    -- if score > recoverPoints then
+    --     -- can't go above 3 health
+    --     health = math.min(3, health + 1)
+
+    --     -- multiply recover points by 2, but no more than 100000
+    --     recoverPoints = math.min(100000, recoverPoints * 2)
+
+    --     -- play recover sound effect
+    --     gSounds['recover']:play()
+    -- end   
+
+    if (score == 200 and currentIndex < 4) then
+    -- can't go above 3 health
+        health = math.min(3, health + 1)
+        player = paddleSize[currentIndex + 1]
+        currentIndex = currentIndex + 1
+
+    -- multiply recover points by 2, but no more than 100000
+
+    -- play recover sound effect
+        gSounds['recover']:play()
+    end   
+
+    if (score == 400 and currentIndex < 4) then
+
+        health = math.min(3, health + 1)
+        player = paddleSize[currentIndex + 1]
+        currentIndex = currentIndex + 1
+        gSounds['recover']:play()
+    end
+
+
+    self.x = self.x + -self.dx * dt
+    self.y = self.y + -self.dy * dt
+
+    if self.dx > 0 then
+        -- left edge
+        if self.x + 2 < target.x then
+            self.dx = -self.dx
+        -- top edge
+        elseif self.y + 1 < target.y then
+            self.dy = -self.dy
+        -- bottom edge
+        else
+            -- bottom edge
+            self.dy = -self.dy
+        end
+    else
+        -- right edge
+        if self.x + 6 > target.x + target.width then
+            -- reset self position
+            self.dx = -self.dx
+        elseif self.y + 1 < target.y then
+            -- top edge
+            self.dy = -self.dy
+        else
+            -- bottom edge
+            self.dy = -self.dy
+        end
+    end
+end
+
 
 --[[
     Places the ball in the middle of the screen, with no movement.
@@ -60,6 +155,9 @@ function Ball:reset()
     self.dx = 0
     self.dy = 0
 end
+
+-- function Ball:delete()
+--     self.x = 
 
 function Ball:update(dt)
     self.x = self.x + self.dx * dt
